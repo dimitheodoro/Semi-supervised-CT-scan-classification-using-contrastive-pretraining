@@ -35,7 +35,7 @@ with zipfile.ZipFile("CT-0.zip", "r") as z_fp:
 with zipfile.ZipFile("CT-23.zip", "r") as z_fp:
     z_fp.extractall("./MosMedData/")
 
-############################################################
+############################################################ for quick trial s
 norm = os.listdir('/content/MosMedData/CT-0')
 patho = os.listdir('/content/MosMedData/CT-23')
 
@@ -127,8 +127,6 @@ abnormal_scan_paths = [
 ]
 
 
-#from shape (481,481,36,32,32,8) into shape (481,481)
-# Read and process the scans.
 # Each scan is resized across height, width, and depth and rescaled.
 abnormal_scans =([process_scan(path) for path in abnormal_scan_paths])
 normal_scans = ([process_scan(path) for path in normal_scan_paths])
@@ -145,10 +143,10 @@ patho_len =len(patho)
 
 
 x_train = np.concatenate((abnormal_scans[0][:int(0.2*norm_len)], normal_scans[0][:int(0.2*norm_len)]), axis=0)
-y_train = np.concatenate((abnormal_labels[:int(0.2*norm_len)], normal_labels[:int(0.2*norm_len)]), axis=0) ##################################
+y_train = np.concatenate((abnormal_labels[:int(0.2*norm_len)], normal_labels[:int(0.2*norm_len)]), axis=0) 
 
 x_val = np.concatenate((abnormal_scans[0][int(0.2*norm_len):int(0.3*norm_len)], normal_scans[0][int(0.2*norm_len):int(0.3*norm_len)]), axis=0)
-y_val = np.concatenate((abnormal_labels[int(0.2*norm_len):int(0.3*norm_len)], normal_labels[int(0.2*norm_len):int(0.3*norm_len)]), axis=0) #############################################
+y_val = np.concatenate((abnormal_labels[int(0.2*norm_len):int(0.3*norm_len)], normal_labels[int(0.2*norm_len):int(0.3*norm_len)]), axis=0)
 
 
 x_train= np.reshape(x_train, (-1, x_train.shape[-3], x_train.shape[-2], x_train.shape[-1]))
@@ -157,7 +155,7 @@ y_train = np.concatenate( ([1 for _ in range(int(len(x_train)/2))]  , [0 for _ i
 x_val= np.reshape(x_val, (-1, x_val.shape[-3], x_val.shape[-2], x_val.shape[-1]))
 y_val = np.concatenate( ( [1 for _ in range(int(len(x_val)/2))] , [0 for _ in range(int(len(x_val)/2))] ),axis=0)
 
-unlabelled = np.concatenate((abnormal_scans[0][int(0.3*norm_len)::], normal_scans[0][int(0.3*norm_len)::]), axis=0) #(60, 33, 25, 32, 32, 8)
+unlabelled = np.concatenate((abnormal_scans[0][int(0.3*norm_len)::], normal_scans[0][int(0.3*norm_len)::]), axis=0) 
 unlabelled= np.reshape(unlabelled, (-1, unlabelled.shape[-3], unlabelled.shape[-2], unlabelled.shape[-1]))
 
 no_labels = np.array([2 for _ in range(len(unlabelled))])
@@ -263,9 +261,6 @@ def get_augmenter(min_area, brightness, jitter):
         ]
     )
 
-
-
-
 def get_encoder():
     return keras.Sequential(
         [
@@ -282,9 +277,6 @@ def get_encoder():
         ],
         name="encoder",
     )
-
-
-
 
 baseline_model = keras.Sequential(
     [
@@ -311,7 +303,6 @@ baseline_model.compile(
 #     )
 # )
  
-
 ######################### 
 
 class ContrastiveModel(keras.Model):
