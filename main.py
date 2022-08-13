@@ -513,3 +513,7 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 # plt.savefig('/content/drive/MyDrive/Loss_ultra_sound.png')
 plt.show()
+
+
+# for predicttions
+# finetuning_model.predict(np.expand_dims(x_val[0], axis=0))[0]
