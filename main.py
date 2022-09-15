@@ -514,6 +514,31 @@ plt.legend(['Train', 'Test'], loc='upper left')
 # plt.savefig('/content/drive/MyDrive/Loss_ultra_sound.png')
 plt.show()
 
-
+################################ predictions
 # for predicttions
 # finetuning_model.predict(np.expand_dims(x_val[0], axis=0))[0]
+
+
+scan =process_scan('/content/MosMedData/CT-0/study_0004.nii.gz')
+
+scan = np.reshape(scan , (-1, x_train.shape[-3], x_train.shape[-2], x_train.shape[-1]))
+print(scan.shape)
+scan = tf.data.Dataset.from_tensor_slices((scan))
+
+scan = (
+    scan.shuffle(len(x_train))
+    .batch(batch_size))
+  
+predictions = (finetuning_model.predict(scan))
+
+preds = np.argmax(predictions,axis =1)
+zero_class= preds[preds==0]
+one_class =preds[preds==1]
+
+len_one_class = one_class.shape[0]
+len_zero_class = zero_class.shape[0]
+
+if len_one_class> len_zero_class:
+  print("ONE CLASS",len_one_class,len_zero_class)
+else:
+  print("ZERO CLASS",len_zero_class,len_one_class)
