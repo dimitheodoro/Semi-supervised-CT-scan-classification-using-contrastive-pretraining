@@ -1,5 +1,6 @@
+import numpy as np
 from scipy import ndimage
-# !pip install pydicom
+!pip install pydicom
 import  pydicom as dcm
 import matplotlib.pyplot as plt
 
@@ -32,6 +33,7 @@ def get_windowing(data):
 def read_dicom_images(path):
     scans = [dcm.read_file(os.path.join(path,slice)) for slice in os.listdir(path)]
     slices = np.array([dcm.read_file(os.path.join(path,slice)).pixel_array for slice in os.listdir(path)])
+    slices =np.transpose(slices,(1,2,0))
     window_center , window_width, intercept, slope = get_windowing(scans[0])  
     return  window_image(slices,window_center , window_width, intercept, slope )
 
@@ -54,8 +56,7 @@ def resize_volume(img):
     depth_factor = 1 / depth
     width_factor = 1 / width
     height_factor = 1 / height
-    # Rotate
-    img = ndimage.rotate(img, 90, reshape=False)
+
     # Resize across z-axis
     img = ndimage.zoom(img, (width_factor, height_factor, depth_factor), order=1)
     print(img.shape)
