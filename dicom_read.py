@@ -38,13 +38,13 @@ def read_dicom_images(path):
     return  window_image(slices,window_center , window_width, intercept, slope )
 
 
-def resize_volume(img):
+def resize_volume(img,desired_width,desired_height,desired_depth):
     print(img.shape)
     """Resize across z-axis"""
-    # Set the desired depth
-    desired_depth = 64
-    desired_width = 128
-    desired_height = 128
+    # # Set the desired depth
+    # desired_depth = 64
+    # desired_width = 128
+    # desired_height = 128
     # Get current depth
     current_depth = img.shape[-1]
     current_width = img.shape[0]
@@ -68,8 +68,8 @@ def process_scan(path):
     # Read scan
     volume = read_dicom_images(path)
     # Resize width, height and depth
-    volume = resize_volume(volume)
+    volume = resize_volume(volume,64,64,32)
     return volume
 
 
-new_volume =process_scan('lung-ct.volume-3d')
+# new_volume =process_scan('lung-ct.volume-3d')
