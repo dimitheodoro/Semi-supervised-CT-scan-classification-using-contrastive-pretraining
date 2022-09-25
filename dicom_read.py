@@ -67,14 +67,7 @@ def get_spacing(path):
 
     pixel_spacing = [dcm.read_file(os.path.join(path,slice)).PixelSpacing for slice in (os.listdir((path)))][:1]
     slice_thickness = [dcm.read_file(os.path.join(path,slice)).SliceThickness for slice in (os.listdir((path)))][:1]
-
-
-    # one_axis_spacing = np.array(np.float32(slice_thickness)+pixel_spacing)[0][0]
-    # pixel_spacing = [dcm.read_file(os.path.join(path,slice))[('0028','0030')].value for slice in (os.listdir((path)))][:1]
-    # slice_thickness = [dcm.read_file(os.path.join(path,slice))[('0018','0050')].value for slice in (os.listdir((path)))][:1]
-    # # one_axis_spacing = np.array(np.float32(slice_thickness)+pixel_spacing)[0][0]
     
-
     return  pixel_spacing,slice_thickness
                           
 pixel_spacing,slice_thickness = get_spacing(path)
