@@ -4,8 +4,6 @@ from scipy import ndimage
 import  pydicom as dcm
 import matplotlib.pyplot as plt
 
-
-
 ############################  WITH  SORTED SLICCES ######################################## 
 
 
@@ -64,85 +62,40 @@ slices =process_scan('lung-ct.volume-3d',sorted_dcm)
 
 
 print(slices.shape)
+########################################## resampling ###############################################
+def get_spacing(path):
 
-#############################################################################################
-
-#############################################################################################
-#############################################################################################
-
-#############################################################################################
-#############################################################################################
-
-#############################################################################################
-#############################################################################################
-
-#############################################################################################
-
-############################  WITHOUT SORTED SLICCES ########################################
+    pixel_spacing = [dcm.read_file(os.path.join(path,slice)).PixelSpacing for slice in (os.listdir((path)))][:1]
+    slice_thickness = [dcm.read_file(os.path.join(path,slice)).SliceThickness for slice in (os.listdir((path)))][:1]
 
 
-# Function to take care of teh translation and windowing. 
-def window_image(img, window_center,window_width, intercept, slope, rescale=True):
-    img = (img*slope +intercept) #for translation adjustments given in the dicom file. 
-    img_min = window_center - window_width//2 #minimum HU level
-    img_max = window_center + window_width//2 #maximum HU level
-    img[img<img_min] = img_min #set img_min for all HU levels less than minimum HU level
-    img[img>img_max] = img_max #set img_max for all HU levels higher than maximum HU level
-    if rescale: 
-        img = (img - img_min) / (img_max - img_min)*255.0 
-    return img
+    # one_axis_spacing = np.array(np.float32(slice_thickness)+pixel_spacing)[0][0]
+    # pixel_spacing = [dcm.read_file(os.path.join(path,slice))[('0028','0030')].value for slice in (os.listdir((path)))][:1]
+    # slice_thickness = [dcm.read_file(os.path.join(path,slice))[('0018','0050')].value for slice in (os.listdir((path)))][:1]
+    # # one_axis_spacing = np.array(np.float32(slice_thickness)+pixel_spacing)[0][0]
     
-def get_first_of_dicom_field_as_int(x):
-    #get x[0] as in int is x is a 'pydicom.multival.MultiValue', otherwise get int(x)
-    if type(x) == dcm.multival.MultiValue: return int(x[0])
-    else: return int(x)
+
+    return  pixel_spacing,slice_thickness
+                          
+pixel_spacing,slice_thickness = get_spacing(path)
+# print(pixel_spacing,slice_thickness)
+
+def resample(image,pixel_spacing, slice_thickness , new_spacing=[1,1,1]):
+
+    spacing = np.array([slice_thickness[0],pixel_spacing[0][0],pixel_spacing[0][1]])
+    resize_factor = spacing / np.array(new_spacing)  
+    new_real_shape = image.shape * resize_factor
+    new_shape = np.round(new_real_shape)
+    real_resize_factor = new_shape / image.shape
+    new_spacing = spacing / real_resize_factor    
+    print("new_spacing:",new_spacing)
+    image = zoom(image, real_resize_factor, mode='nearest')
+  
     
-def get_windowing(data):
-    dicom_fields = [data[('0028','1050')].value, #window center
-                    data[('0028','1051')].value, #window width
-                    data[('0028','1052')].value, #intercept
-                    data[('0028','1053')].value] #slope
-    return [get_first_of_dicom_field_as_int(x) for x in dicom_fields]
+    return image
+
+resampled_slices=resample (slices,pixel_spacing, slice_thickness)
+
+resampled_slices.shape
 
 
-
-
-def read_dicom_images(path):
-    scans = [dcm.read_file(os.path.join(path,slice)) for slice in os.listdir(path)]
-    slices = np.array([dcm.read_file(os.path.join(path,slice)).pixel_array for slice in os.listdir(path)])
-    slices =np.transpose(slices,(1,2,0))
-    window_center , window_width, intercept, slope = get_windowing(scans[0])  
-    return  window_image(slices,window_center , window_width, intercept, slope )
-
-
-def resize_volume(img,desired_width,desired_height,desired_depth):
-    print(img.shape)
-    """Resize across z-axis"""
-    # Get current depth
-    current_depth = img.shape[-1]
-    current_width = img.shape[0]
-    current_height = img.shape[1]
-    # Compute depth factor
-    depth = current_depth / desired_depth
-    width = current_width / desired_width
-    height = current_height / desired_height
-    depth_factor = 1 / depth
-    width_factor = 1 / width
-    height_factor = 1 / height
-
-    # Resize across z-axis
-    img = ndimage.zoom(img, (width_factor, height_factor, depth_factor), order=1)
-    print(img.shape)
-    return img
-
-
-def process_scan(path):
-    """Read and resize volume"""
-    # Read scan
-    volume = read_dicom_images(path)
-    # Resize width, height and depth
-    volume = resize_volume(volume,64,64,32)
-    return volume
-
-
-# new_volume =process_scan('lung-ct.volume-3d')
